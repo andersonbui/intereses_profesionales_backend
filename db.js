@@ -2,7 +2,8 @@
 var mysql = require('mysql');
 var async = require('async');
 
-var PRODUCTION_DB = 'prefpro'
+var PRODUCTION_DB = 'sql10260937'
+// var PRODUCTION_DB = 'prefpro'
   , TEST_DB = 'app_test_database'
 
 exports.MODE_TEST = 'mode_test'
@@ -15,9 +16,12 @@ var state = {
 
 exports.connect = function(mode, done) {
     state.pool = mysql.createPool({
-      host: '127.0.0.1',
-      user: 'prefpro',
-      password: 'prefpro',
+      host: 'sql10.freemysqlhosting.net',
+      user: 'sql10260937',
+      password: 'm2JrRwG2uy',
+      // host: '127.0.0.1',
+      // user: 'prefpro',
+      // password: 'prefpro',
       database: mode === exports.MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB
     });
   
@@ -57,7 +61,7 @@ exports.connect = function(mode, done) {
     var pool = state.pool
     if (!pool) return done(null,new Error('Missing database connection.'))
     
-    pool.query("SELECT * FROM persona", function(res){
+    pool.query("SELECT * FROM Usuario", function(res){
       done(res);
     }) 
   }
@@ -65,7 +69,7 @@ exports.connect = function(mode, done) {
   exports.getAll = function(done) {
     var pool = state.pool
     if (!pool) return done(null,new Error('Missing database connection.'))
-    pool.query('SELECT * FROM persona', function (err, rows) {
+    pool.query('SELECT * FROM Usuario', function (err, rows) {
       if (err) return done(err)
       done(null, rows)
     })
@@ -74,7 +78,7 @@ exports.connect = function(mode, done) {
   exports.getById = function(userId, done) {
     var pool = state.pool
     if (!pool) return done(null,new Error('Missing database connection.'))
-    pool.query('SELECT * FROM persona WHERE id = ?', userId, function (err, rows) {
+    pool.query('SELECT * FROM Usuario WHERE idUsuario = ?', userId, function (err, rows) {
       if (err) return done(err)
       done(null, rows)
     })
