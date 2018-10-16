@@ -25,7 +25,6 @@ db.connect(db.MODE_PRODUCTION, function() {
 })*/
 
 
-
 //////
 // router.use((req, res, next) => {
 //   req.collection = req.db.collection("users");
@@ -35,28 +34,89 @@ db.connect(db.MODE_PRODUCTION, function() {
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
-  db.connect(db.MODE_PRODUCTION, function () {
-    db.getAll(function (err, resultado) {
-      if (err) console.log(err);
-      res.send({ data: resultado});
-    })
-  })
-});
-
-router.get("/:id", (req, res, next)=>{
   let id = req.params.id;
   db.connect(db.MODE_PRODUCTION, function () {
-    db.getById(id, function (err, resultado) {
-      if (err) console.log(err);
-      res.send({ data: resultado});
-    })
+    let pool = db.get();
+    if (!pool) new Error('Missing database connection.');
+    pool.query('SELECT * FROM Usuario', function (err, rows) {
+      if (err) return console.log(err);
+      res.send({ data: rows});
+    });
   });
 });
 
+router.get("/:id", (req, res, next) => {
+  let id = req.params.id;
+  db.connect(db.MODE_PRODUCTION, function () {
+    let pool = db.get();
+    if (!pool) new Error('Missing database connection.');
+    pool.query('SELECT * FROM Usuario WHERE idUsuario = ?', id, function (err, rows) {
+      if (err) console.log(err);
+      res.send({ data: rows });
+    });
+  });
+});
+
+router.put("/:id", (req, res, next) => {
+  let id = req.params.id;
+  let body = req.body;
+  db.connect(db.MODE_PRODUCTION, function () {
+    let pool = db.get();
+    if (!pool) { new Error('Missing database connection.'); } else{
+      pool.query('UPDATE Usuario SET ? WHERE idUsuario = ?', [body, id], function (err, result) {
+        if (err) {
+          res.send({ success: false });
+        } else {
+          console.log("result: " + JSON.stringify(result));
+          if (result.affectedRows > 0) {
+            res.send({ success: true });
+          } else {
+            res.send({ success: false });
+          }
+        }
+      });
+    }
+  });
+});
+
+router.post("/", (req, res, next) => {
+  let objeto = req.body.objeto;
+  let sesion = req.body.sesion;
+  confirmarSesion(sesion, function (respuesta) {
+    console.log("confirmarSesion devuelto: ", respuesta);
+    if (respuesta) {
+      db.connect(db.MODE_PRODUCTION, function () {
+        let pool = db.get();
+        if (!pool) new Error('Missing database connection.');
+        pool.query("INSERT INTO Usuario SET ?", objeto, (err, result) => {
+          if (err) {
+            res.send({ success: false });
+          } else {
+            console.log("result: " + JSON.stringify(result));
+            res.send({ success: true });
+          }
+        });
+      });
+    } else {
+      res.status(404).send({ msg: "sesion incorrecta" });
+      //res.send({ success: false });
+    }
+  });
+});
+
+function confirmarSesion(sesion, done){
+  db.connect(db.MODE_PRODUCTION, function () {
+    let pool = db.get();
+    if (!pool) new Error('Missing database connection.');
+    pool.query('SELECT codigoSesion FROM Usuario WHERE codigoSesion = ? ', sesion, function (err, rows) {
+      if (err) return console.log(err);
+      done(rows[0]);
+    });
+  });
+}
+
 router.post("/signin", (req, res, next) => {
-
   let user = req.body;
-
   req.collection.findOne({ username: user.username }).then(doc => {
     if (doc) {
       res.send({ success: false, exist: true });
