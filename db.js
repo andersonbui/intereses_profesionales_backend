@@ -2,8 +2,8 @@
 var mysql = require('mysql');
 var async = require('async');
 
-var PRODUCTION_DB = 'sql10260937'
-// var PRODUCTION_DB = 'interpro'
+// var PRODUCTION_DB = 'sql10260937'
+var PRODUCTION_DB = 'interpro'
   , TEST_DB = 'app_test_database'
 
 exports.MODE_TEST = 'mode_test'
@@ -14,14 +14,14 @@ var state = {
   mode: null
 }
 
-exports.connect = function(mode, done) {
+  exports.connect = function(mode, done) {
     state.pool = mysql.createPool({
-      host: 'sql10.freemysqlhosting.net',
-      user: 'sql10260937',
-      password: 'm2JrRwG2uy',
-      // host: '127.0.0.1',
-      // user: 'interpro',
-      // password: 'interpro',
+      // host: 'sql10.freemysqlhosting.net',
+      // user: 'sql10260937',
+      // password: 'm2JrRwG2uy',
+      host: '127.0.0.1',
+      user: 'interpro',
+      password: 'interpro',
       database: mode === exports.MODE_PRODUCTION ? PRODUCTION_DB : TEST_DB
     });
   
